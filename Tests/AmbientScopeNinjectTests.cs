@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Ninject.Extensions.AmbientScopes.Tests.Mocks;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,42 +7,25 @@ using System.Threading.Tasks;
 
 namespace Ninject.Extensions.AmbientScopes.Tests
 {
-    public class AmbientScopeNinjectTests
+    public partial class AmbientScopeNinjectTests
     {
-
-        public class MyService : IDisposable
-        {
-            public bool IsDisposed { get; private set; }
-
-            public IKernel Kernel { get; private set; }
-
-            public MyService(IKernel kernel)
-            {
-                Kernel = kernel;
-            }
-
-            public void Dispose()
-            {
-                IsDisposed = true;
-            }
-        }
 
         [Fact]
         public void ConstantValuesAreSameAcrossScopes()
         {
             var kernel = new StandardKernel();
-            var myConstantValue = new MyService(kernel);
+            var myConstantValue = new MyServiceA(kernel);
             kernel.UseAmbientScopes();
-            kernel.Bind<MyService>().ToConstant(myConstantValue).InTransientScope();
+            kernel.Bind<MyServiceA>().ToConstant(myConstantValue).InTransientScope();
 
-            MyService firstInstance;
-            MyService secondInstance;
+            MyServiceA firstInstance;
+            MyServiceA secondInstance;
 
-            firstInstance = kernel.Get<MyService>();
+            firstInstance = kernel.Get<MyServiceA>();
 
             using (kernel.BeginAmbientScope())
             {
-                secondInstance = kernel.Get<MyService>();
+                secondInstance = kernel.Get<MyServiceA>();
             }
 
             Assert.Same(firstInstance, secondInstance);
@@ -54,16 +38,16 @@ namespace Ninject.Extensions.AmbientScopes.Tests
         {
             var kernel = new StandardKernel();
             kernel.UseAmbientScopes();
-            kernel.Bind<MyService>().ToSelf().InSingletonScope();
+            kernel.Bind<MyServiceA>().ToSelf().InSingletonScope();
 
-            MyService firstInstance;
-            MyService secondInstance;
+            MyServiceA firstInstance;
+            MyServiceA secondInstance;
 
-            firstInstance = kernel.Get<MyService>();
+            firstInstance = kernel.Get<MyServiceA>();
 
             using (kernel.BeginAmbientScope())
             {
-                secondInstance = kernel.Get<MyService>();
+                secondInstance = kernel.Get<MyServiceA>();
             }
 
             Assert.Same(firstInstance, secondInstance);
@@ -76,15 +60,15 @@ namespace Ninject.Extensions.AmbientScopes.Tests
         {
             var kernel = new StandardKernel();
             kernel.UseAmbientScopes();
-            kernel.Bind<MyService>().ToSelf().InAmbientScope();
+            kernel.Bind<MyServiceA>().ToSelf().InAmbientScope();
 
-            MyService firstInstance;
-            MyService secondInstance;
+            MyServiceA firstInstance;
+            MyServiceA secondInstance;
 
             using (kernel.BeginAmbientScope())
             {
-                firstInstance = kernel.Get<MyService>();
-                secondInstance = kernel.Get<MyService>();
+                firstInstance = kernel.Get<MyServiceA>();
+                secondInstance = kernel.Get<MyServiceA>();
             }
 
             Assert.Same(firstInstance, secondInstance);
@@ -97,11 +81,11 @@ namespace Ninject.Extensions.AmbientScopes.Tests
         {
             var kernel = new StandardKernel();
             kernel.UseAmbientScopes();
-            kernel.Bind<MyService>().ToSelf().InAmbientScope();
+            kernel.Bind<MyServiceA>().ToSelf().InAmbientScope();
 
             Assert.Null(kernel.Get<AmbientScopeProvider>().Current);
-            var firstInstance = kernel.Get<MyService>();
-            var secondInstance = kernel.Get<MyService>();
+            var firstInstance = kernel.Get<MyServiceA>();
+            var secondInstance = kernel.Get<MyServiceA>();
 
             Assert.NotSame(firstInstance, secondInstance);
             Assert.False(kernel.IsDisposed);
@@ -114,19 +98,19 @@ namespace Ninject.Extensions.AmbientScopes.Tests
         {
             var kernel = new StandardKernel();
             kernel.UseAmbientScopes();
-            kernel.Bind<MyService>().ToSelf().InAmbientScope();
+            kernel.Bind<MyServiceA>().ToSelf().InAmbientScope();
 
-            MyService firstInstance;
-            MyService secondInstance;
+            MyServiceA firstInstance;
+            MyServiceA secondInstance;
 
             using (kernel.BeginAmbientScope())
             {
-                firstInstance = kernel.Get<MyService>();
+                firstInstance = kernel.Get<MyServiceA>();
             }
 
             using (kernel.BeginAmbientScope())
             {
-                secondInstance = kernel.Get<MyService>();
+                secondInstance = kernel.Get<MyServiceA>();
             }
 
             Assert.NotSame(firstInstance, secondInstance);

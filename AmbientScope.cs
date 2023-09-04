@@ -25,7 +25,7 @@ namespace Ninject.Extensions.AmbientScopes
         /// For nested scopes, reference to the parent scope.
         /// For the outer scope, this value is null.
         /// </summary>
-        internal AmbientScope Parent
+        public AmbientScope Parent
         {
             get => _parent;
         }

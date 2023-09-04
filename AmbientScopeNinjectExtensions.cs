@@ -1,4 +1,5 @@
-﻿using Ninject.Extensions;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Ninject.Extensions;
 using Ninject.Syntax;
 using System;
 
@@ -32,6 +33,7 @@ namespace Ninject.Extensions.AmbientScopes
             }
 
             kernel.Bind<AmbientScopeProvider>().ToSelf().InSingletonScope();
+            kernel.Bind<IServiceScopeFactory>().To<NinjectServiceScopeFactoryAdapter>().InSingletonScope();
         }
 
         /// <summary>
