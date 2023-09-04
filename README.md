@@ -116,6 +116,7 @@ This library comes with a comprehensive set of unit tests. To run them, either u
 
 ```bash
 dotnet test
+```
 
 ## Contributing
 
