@@ -5,6 +5,10 @@ using System.Threading;
 
 namespace Ninject.Extensions.AmbientScopes
 {
+
+    /// <summary>
+    /// Provides management for ambient scopes, allowing objects to be tracked within specific lifecycles.
+    /// </summary>
     public class AmbientScopeProvider
     {
 
@@ -12,11 +16,17 @@ namespace Ninject.Extensions.AmbientScopes
 
         private readonly AsyncLocal<AmbientScope> _current = new AsyncLocal<AmbientScope>();
 
+        /// <summary>
+        /// Gets the current ambient scope within the context of the executing code.
+        /// </summary>
         public AmbientScope Current
         {
             get => _current.Value;
         }
 
+        /// <summary>
+        /// Begins a new ambient scope, making it the current scope.
+        /// </summary>
         public AmbientScope BeginScope()
         {
             lock (_lock)

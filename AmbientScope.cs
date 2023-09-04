@@ -18,6 +18,10 @@ namespace Ninject.Extensions.AmbientScopes
 
         public bool IsDisposed { get; private set; }
 
+        /// <summary>
+        /// For nested scopes, reference to the parent scope.
+        /// For the outer scope, this value is null.
+        /// </summary>
         internal AmbientScope Parent
         {
             get => _parent;
