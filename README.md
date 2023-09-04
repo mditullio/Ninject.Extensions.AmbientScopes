@@ -9,10 +9,10 @@ This library makes it easier to manage scoped dependencies in your application w
 1. [Installation](#installation)
 2. [Usage](#usage)
     - [Basic Usage](#basic-usage)
-    - [Advanced Usage](#advanced-usage)
+    - [Nested Scopes](#nested-scopes)
+    - [Threading and Task Considerations](#threading-and-task-considerations)
 3. [Running the Tests](#running-the-tests)
 4. [Contributing](#contributing)
-5. [License](#license)
 
 ## Installation
 
@@ -116,3 +116,8 @@ This library comes with a comprehensive set of unit tests. To run them, either u
 
 ```bash
 dotnet test
+
+## Contributing
+
+Feel free to review the code, make pull requests, or suggestions.
+Thanks for reading !
