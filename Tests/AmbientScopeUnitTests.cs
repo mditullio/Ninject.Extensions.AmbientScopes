@@ -35,6 +35,70 @@ namespace Ninject.Extensions.AmbientScopes.Tests
             }
         }
 
+        public class WhenResettingScope : AmbientScopeUnitTests
+        {
+
+            [Fact]
+            public async Task CurrentIsResetToOuterScope()
+            {
+                AmbientScope previousScope;
+
+                // Creating outer scope
+                var outerScope = _provider.BeginScope();
+                Assert.Equal(outerScope, _provider.Current);
+                await Task.Yield();
+
+                // Creating inner scope
+                var innerScope = _provider.BeginScope();
+                Assert.Equal(innerScope, _provider.Current);
+                await Task.Yield();
+
+                // Manually resetting to outer scope
+                previousScope = _provider.ResetScope(outerScope);
+                Assert.Equal(previousScope, innerScope);
+                Assert.Equal(outerScope, _provider.Current);
+
+                // Disposing inner scope does not alter current scope
+                innerScope.Dispose();
+                Assert.False(outerScope.IsDisposed);
+                Assert.True(innerScope.IsDisposed);
+                Assert.Equal(outerScope, _provider.Current);
+            }
+
+            [Fact]
+            public async Task CurrentIsResetToNull()
+            {
+                AmbientScope previousScope;
+
+                // Creating first scope
+                var firstScope = _provider.BeginScope();
+                Assert.Equal(firstScope, _provider.Current);
+                await Task.Yield();
+
+                // Resetting to null (no ambient scope)
+                previousScope = _provider.ResetScope(null);
+                Assert.Equal(previousScope, firstScope);
+                Assert.Null(_provider.Current);
+
+                // Creating second scope
+                var secondScope = _provider.BeginScope();
+                Assert.Equal(secondScope, _provider.Current);
+                await Task.Yield();
+
+                // Resetting to first scope
+                previousScope = _provider.ResetScope(firstScope);
+                Assert.Equal(previousScope, secondScope);
+                Assert.Equal(firstScope, _provider.Current);
+
+                // Disposing first scope should reset current scope to null
+                firstScope.Dispose();
+                Assert.True(firstScope.IsDisposed);
+                Assert.False(secondScope.IsDisposed);
+                Assert.Null(_provider.Current);
+            }
+
+        }
+
         public class WhenDisposingScope : AmbientScopeUnitTests
         {
 

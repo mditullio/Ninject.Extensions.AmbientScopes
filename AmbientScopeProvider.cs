@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 
@@ -32,9 +33,29 @@ namespace Ninject.Extensions.AmbientScopes
             lock (_lock)
             {
                 var newScope = new AmbientScope(_current.Value);
+                newScope.Disposed -= OnAmbientScopeDisposed;
                 newScope.Disposed += OnAmbientScopeDisposed;
                 _current.Value = newScope;
                 return newScope;
+            }
+        }
+
+        /// <summary>
+        /// Sets an existing ambient scope as the current scope.
+        /// </summary>
+        /// <returns>The previous ambient scope</returns>
+        public AmbientScope ResetScope(AmbientScope existingScope)
+        {
+            lock (_lock)
+            {
+                var oldScope = _current.Value;
+                _current.Value = existingScope;
+                if (existingScope != null)
+                {
+                    existingScope.Disposed -= OnAmbientScopeDisposed;
+                    existingScope.Disposed += OnAmbientScopeDisposed;
+                }
+                return oldScope;
             }
         }
 
@@ -51,7 +72,7 @@ namespace Ninject.Extensions.AmbientScopes
 
         private static AmbientScope GetValidAncestor(AmbientScope disposedScope)
         {
-            AmbientScope validAncestor = disposedScope.Parent;            
+            AmbientScope validAncestor = disposedScope.Parent;
             while (validAncestor != null && validAncestor.IsDisposed)
             {
                 validAncestor = validAncestor.Parent;
