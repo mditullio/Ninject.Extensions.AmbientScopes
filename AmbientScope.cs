@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 
 namespace Ninject.Extensions.AmbientScopes
 {
+    /// <summary>
+    /// The ambient scope provides deterministic disposal of objects, ensuring proper cleanup and resource management.
+    /// </summary>
     public class AmbientScope : IDisposable, INotifyWhenDisposed
     {
 

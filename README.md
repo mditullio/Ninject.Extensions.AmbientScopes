@@ -2,6 +2,7 @@
 
 This library is an extension to Ninject, providing a way to define ambient scopes. 
 An ambient scope is a logical container for objects that are shared during the lifetime of an ambient transaction. 
+The ambient scope provides deterministic disposal of objects, ensuring proper cleanup and resource management.
 This library makes it easier to manage scoped dependencies in your application when using Ninject for dependency injection.
 
 ## Table of Contents
