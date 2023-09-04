@@ -13,6 +13,13 @@ namespace Ninject.Extensions.AmbientScopes.Tests
         {
             public bool IsDisposed { get; private set; }
 
+            public IKernel Kernel { get; private set; }
+
+            public MyService(IKernel kernel)
+            {
+                Kernel = kernel;
+            }
+
             public void Dispose()
             {
                 IsDisposed = true;
@@ -23,7 +30,7 @@ namespace Ninject.Extensions.AmbientScopes.Tests
         public void ConstantValuesAreSameAcrossScopes()
         {
             var kernel = new StandardKernel();
-            var myConstantValue = new MyService();
+            var myConstantValue = new MyService(kernel);
             kernel.UseAmbientScopes();
             kernel.Bind<MyService>().ToConstant(myConstantValue).InTransientScope();
 
@@ -38,6 +45,7 @@ namespace Ninject.Extensions.AmbientScopes.Tests
             }
 
             Assert.Same(firstInstance, secondInstance);
+            Assert.False(kernel.IsDisposed);
             Assert.False(firstInstance.IsDisposed);
         }
 
@@ -59,6 +67,7 @@ namespace Ninject.Extensions.AmbientScopes.Tests
             }
 
             Assert.Same(firstInstance, secondInstance);
+            Assert.False(kernel.IsDisposed);
             Assert.False(firstInstance.IsDisposed);
         }
 
@@ -79,6 +88,7 @@ namespace Ninject.Extensions.AmbientScopes.Tests
             }
 
             Assert.Same(firstInstance, secondInstance);
+            Assert.False(kernel.IsDisposed);
             Assert.True(firstInstance.IsDisposed);
         }
 
@@ -94,6 +104,7 @@ namespace Ninject.Extensions.AmbientScopes.Tests
             var secondInstance = kernel.Get<MyService>();
 
             Assert.NotSame(firstInstance, secondInstance);
+            Assert.False(kernel.IsDisposed);
             Assert.False(firstInstance.IsDisposed);
             Assert.False(secondInstance.IsDisposed);
         }
@@ -119,6 +130,7 @@ namespace Ninject.Extensions.AmbientScopes.Tests
             }
 
             Assert.NotSame(firstInstance, secondInstance);
+            Assert.False(kernel.IsDisposed);
             Assert.True(firstInstance.IsDisposed);
             Assert.True(secondInstance.IsDisposed);
         }
