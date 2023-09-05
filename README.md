@@ -27,7 +27,7 @@ To install the package, you can reference it directly from your project.
    
     ```csharp
     var kernel = new StandardKernel();
-    kernel.UseAmbientScopes();
+    kernel.LoadAmbientScopeModule();
     ```
 
 2. **Bind Services with Ambient Scope**

@@ -14,7 +14,7 @@ namespace Ninject.Extensions.AmbientScopes.Tests
         public void ConstantValuesAreSameAcrossScopes()
         {
             var kernel = new StandardKernel();
-            kernel.UseAmbientScopes();
+            kernel.LoadAmbientScopeModule();
 
             var myServiceC = new MyServiceC();
             var myServiceB = new MyServiceB(myServiceC);
@@ -41,7 +41,7 @@ namespace Ninject.Extensions.AmbientScopes.Tests
         public void SingletonObjectsAreSameAcrossScopes()
         {
             var kernel = new StandardKernel();
-            kernel.UseAmbientScopes();
+            kernel.LoadAmbientScopeModule();
             kernel.Bind<MyServiceA>().ToSelf().InSingletonScope();
 
             MyServiceA firstInstance;
@@ -63,7 +63,7 @@ namespace Ninject.Extensions.AmbientScopes.Tests
         public void AmbientObjectsAreSameWithinSameScope()
         {
             var kernel = new StandardKernel();
-            kernel.UseAmbientScopes();
+            kernel.LoadAmbientScopeModule();
             kernel.Bind<MyServiceA>().ToSelf().InAmbientScope();
             kernel.Bind<MyServiceB>().ToSelf().InAmbientScope();
             kernel.Bind<MyServiceC>().ToSelf().InSingletonScope();
@@ -90,7 +90,7 @@ namespace Ninject.Extensions.AmbientScopes.Tests
         public void AmbientObjectsAreDifferentWithoutScope()
         {
             var kernel = new StandardKernel();
-            kernel.UseAmbientScopes();
+            kernel.LoadAmbientScopeModule();
             kernel.Bind<MyServiceA>().ToSelf().InAmbientScope();
             kernel.Bind<MyServiceB>().ToSelf().InAmbientScope();
             kernel.Bind<MyServiceC>().ToSelf().InAmbientScope();
@@ -110,7 +110,7 @@ namespace Ninject.Extensions.AmbientScopes.Tests
         public void AmbientObjectsAreDifferentAcrossScopes()
         {
             var kernel = new StandardKernel();
-            kernel.UseAmbientScopes();
+            kernel.LoadAmbientScopeModule();
             kernel.Bind<MyServiceA>().ToSelf().InAmbientScope();
             kernel.Bind<MyServiceB>().ToSelf().InAmbientScope();
             kernel.Bind<MyServiceC>().ToSelf().InSingletonScope();
