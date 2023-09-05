@@ -22,7 +22,7 @@ namespace Ninject.Extensions.AmbientScopes
         public bool IsDisposed { get; private set; }
 
         /// <summary>
-        /// For nested scopes, reference to the parent scope.
+        /// For nested ambient scopes, this reference to the previous scope.
         /// For the outer scope, this value is null.
         /// </summary>
         public AmbientScope Parent
@@ -30,7 +30,7 @@ namespace Ninject.Extensions.AmbientScopes
             get => _parent;
         }
 
-        internal AmbientScope(AmbientScope parent)
+        public AmbientScope(AmbientScope parent = null)
         {
             _parent = parent;
         }

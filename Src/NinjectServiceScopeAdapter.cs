@@ -12,17 +12,16 @@ namespace Ninject.Extensions.AmbientScopes
 
         public IKernel Kernel { get; }
 
-        public AmbientScopeProvider AmbientScopeProvider { get; }
+        public AmbientScopeManager AmbientScopeManager { get; }
 
         public AmbientScope AmbientScope { get; }
 
         public NinjectServiceScopeAdapter(IKernel kernel)
         {
             Kernel = kernel ?? throw new ArgumentNullException(nameof(kernel));
-            AmbientScopeProvider = kernel.Get<AmbientScopeProvider>();
-            AmbientScope = AmbientScopeProvider.BeginScope();
-            AmbientScopeProvider.ResetScope(AmbientScope.Parent);
-            ServiceProvider = new NinjectServiceProviderAdapter(Kernel, AmbientScopeProvider, AmbientScope);
+            AmbientScopeManager = kernel.Get<AmbientScopeManager>();
+            AmbientScope = new AmbientScope();
+            ServiceProvider = new NinjectServiceProviderAdapter(Kernel, AmbientScopeManager, AmbientScope);
         }
 
         public void Dispose()

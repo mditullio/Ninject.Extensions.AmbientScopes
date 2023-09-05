@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Ninject.Extensions.AmbientScopes.csproj" />
+    <ProjectReference Include="..\Src\Ninject.Extensions.AmbientScopes.csproj" />
   </ItemGroup>
 
 </Project>

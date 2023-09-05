@@ -8,10 +8,10 @@ namespace Ninject.Extensions.AmbientScopes
     {
 
         public IKernel Kernel { get; }
-        public AmbientScopeProvider ScopeFactory { get; }
+        public AmbientScopeManager ScopeFactory { get; }
         public AmbientScope AmbientScope { get; }
 
-        public NinjectServiceProviderAdapter(IKernel kernel, AmbientScopeProvider scopeFactory, AmbientScope ambientScope)
+        public NinjectServiceProviderAdapter(IKernel kernel, AmbientScopeManager scopeFactory, AmbientScope ambientScope)
         {
             Kernel = kernel ?? throw new ArgumentNullException(nameof(kernel));
             ScopeFactory = scopeFactory ?? throw new ArgumentNullException(nameof(scopeFactory));
@@ -20,10 +20,16 @@ namespace Ninject.Extensions.AmbientScopes
 
         public object GetService(Type serviceType)
         {
-            var previousScope = ScopeFactory.ResetScope(AmbientScope);
-            var service = Kernel.GetService(serviceType);
-            ScopeFactory.ResetScope(previousScope);
-            return service;
+            var previousScope = ScopeFactory.SetCurrent(AmbientScope);
+            try
+            {
+                var service = Kernel.GetService(serviceType);
+                return service;
+            }
+            finally
+            {
+                ScopeFactory.SetCurrent(previousScope);
+            }
         }
 
     }

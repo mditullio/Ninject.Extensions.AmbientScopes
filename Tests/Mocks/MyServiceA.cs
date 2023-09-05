@@ -4,11 +4,15 @@
     {
         public bool IsDisposed { get; private set; }
 
-        public IKernel Kernel { get; private set; }
+        public IKernel Kernel { get; }
+        public MyServiceB MyServiceB { get; }
+        public MyServiceC MyServiceC { get; }
 
-        public MyServiceA(IKernel kernel)
+        public MyServiceA(IKernel kernel, MyServiceB myServiceB, MyServiceC myServiceC)
         {
             Kernel = kernel;
+            MyServiceB = myServiceB;
+            MyServiceC = myServiceC;
         }
 
         public void Dispose()

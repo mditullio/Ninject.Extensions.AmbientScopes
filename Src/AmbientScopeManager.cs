@@ -10,7 +10,7 @@ namespace Ninject.Extensions.AmbientScopes
     /// <summary>
     /// Provides management for ambient scopes, allowing objects to be tracked within specific lifecycles.
     /// </summary>
-    public class AmbientScopeProvider
+    public class AmbientScopeManager
     {
 
         private readonly object _lock = new object();
@@ -23,6 +23,7 @@ namespace Ninject.Extensions.AmbientScopes
         public AmbientScope Current
         {
             get => _current.Value;
+            set => SetCurrent(value);
         }
 
         /// <summary>
@@ -30,21 +31,16 @@ namespace Ninject.Extensions.AmbientScopes
         /// </summary>
         public AmbientScope BeginScope()
         {
-            lock (_lock)
-            {
-                var newScope = new AmbientScope(_current.Value);
-                newScope.Disposed -= OnAmbientScopeDisposed;
-                newScope.Disposed += OnAmbientScopeDisposed;
-                _current.Value = newScope;
-                return newScope;
-            }
+            var newScope = new AmbientScope(_current.Value);
+            SetCurrent(newScope);
+            return newScope;
         }
 
         /// <summary>
         /// Sets an existing ambient scope as the current scope.
         /// </summary>
         /// <returns>The previous ambient scope</returns>
-        public AmbientScope ResetScope(AmbientScope existingScope)
+        public AmbientScope SetCurrent(AmbientScope existingScope)
         {
             lock (_lock)
             {

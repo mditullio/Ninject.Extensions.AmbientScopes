@@ -3,7 +3,7 @@ namespace Ninject.Extensions.AmbientScopes.Tests
     public class AmbientScopeUnitTests
     {
 
-        protected readonly AmbientScopeProvider _provider = new AmbientScopeProvider();
+        public AmbientScopeManager ScopeManager { get; } = new AmbientScopeManager();
 
         public class WhenBeginningScope : AmbientScopeUnitTests
         {
@@ -12,30 +12,30 @@ namespace Ninject.Extensions.AmbientScopes.Tests
             public async Task NewScopeBecomesCurrent()
             {
                 // Act
-                using var newScope = _provider.BeginScope();
+                using var newScope = ScopeManager.BeginScope();
                 await Task.Yield();
 
                 // Assert
-                Assert.Equal(newScope, _provider.Current);
+                Assert.Equal(newScope, ScopeManager.Current);
             }
 
             [Fact]
             public async Task NestedScopeBecomesCurrent()
             {
                 // Arrange
-                using var outerScope = _provider.BeginScope();
+                using var outerScope = ScopeManager.BeginScope();
                 await Task.Yield();
 
                 // Act
-                using var innerScope = _provider.BeginScope();
+                using var innerScope = ScopeManager.BeginScope();
                 await Task.Yield();
 
                 // Assert
-                Assert.Equal(innerScope, _provider.Current);
+                Assert.Equal(innerScope, ScopeManager.Current);
             }
         }
 
-        public class WhenResettingScope : AmbientScopeUnitTests
+        public class WhenSettingCurrentScope : AmbientScopeUnitTests
         {
 
             [Fact]
@@ -44,25 +44,25 @@ namespace Ninject.Extensions.AmbientScopes.Tests
                 AmbientScope previousScope;
 
                 // Creating outer scope
-                var outerScope = _provider.BeginScope();
-                Assert.Equal(outerScope, _provider.Current);
+                var outerScope = ScopeManager.BeginScope();
+                Assert.Equal(outerScope, ScopeManager.Current);
                 await Task.Yield();
 
                 // Creating inner scope
-                var innerScope = _provider.BeginScope();
-                Assert.Equal(innerScope, _provider.Current);
+                var innerScope = ScopeManager.BeginScope();
+                Assert.Equal(innerScope, ScopeManager.Current);
                 await Task.Yield();
 
                 // Manually resetting to outer scope
-                previousScope = _provider.ResetScope(outerScope);
+                previousScope = ScopeManager.SetCurrent(outerScope);
                 Assert.Equal(previousScope, innerScope);
-                Assert.Equal(outerScope, _provider.Current);
+                Assert.Equal(outerScope, ScopeManager.Current);
 
                 // Disposing inner scope does not alter current scope
                 innerScope.Dispose();
                 Assert.False(outerScope.IsDisposed);
                 Assert.True(innerScope.IsDisposed);
-                Assert.Equal(outerScope, _provider.Current);
+                Assert.Equal(outerScope, ScopeManager.Current);
             }
 
             [Fact]
@@ -71,30 +71,30 @@ namespace Ninject.Extensions.AmbientScopes.Tests
                 AmbientScope previousScope;
 
                 // Creating first scope
-                var firstScope = _provider.BeginScope();
-                Assert.Equal(firstScope, _provider.Current);
+                var firstScope = ScopeManager.BeginScope();
+                Assert.Equal(firstScope, ScopeManager.Current);
                 await Task.Yield();
 
                 // Resetting to null (no ambient scope)
-                previousScope = _provider.ResetScope(null);
+                previousScope = ScopeManager.SetCurrent(null);
                 Assert.Equal(previousScope, firstScope);
-                Assert.Null(_provider.Current);
+                Assert.Null(ScopeManager.Current);
 
                 // Creating second scope
-                var secondScope = _provider.BeginScope();
-                Assert.Equal(secondScope, _provider.Current);
+                var secondScope = ScopeManager.BeginScope();
+                Assert.Equal(secondScope, ScopeManager.Current);
                 await Task.Yield();
 
                 // Resetting to first scope
-                previousScope = _provider.ResetScope(firstScope);
+                previousScope = ScopeManager.SetCurrent(firstScope);
                 Assert.Equal(previousScope, secondScope);
-                Assert.Equal(firstScope, _provider.Current);
+                Assert.Equal(firstScope, ScopeManager.Current);
 
                 // Disposing first scope should reset current scope to null
                 firstScope.Dispose();
                 Assert.True(firstScope.IsDisposed);
                 Assert.False(secondScope.IsDisposed);
-                Assert.Null(_provider.Current);
+                Assert.Null(ScopeManager.Current);
             }
 
         }
@@ -106,7 +106,7 @@ namespace Ninject.Extensions.AmbientScopes.Tests
             public async Task OuterScopeResetsToNull()
             {
                 // Arrange
-                var outerScope = _provider.BeginScope();
+                var outerScope = ScopeManager.BeginScope();
                 await Task.Yield();
 
                 // Act
@@ -114,18 +114,18 @@ namespace Ninject.Extensions.AmbientScopes.Tests
 
                 // Assert
                 Assert.True(outerScope.IsDisposed);
-                Assert.Null(_provider.Current);
+                Assert.Null(ScopeManager.Current);
             }
 
 
             [Fact]
-            public async Task WhenPreviousIsValidThenNestedScopeResetsToPrevious()
+            public async Task NestedScopeResetsToPreviousWhenPreviousIsValid()
             {
                 // Arrange
-                using var outerScope = _provider.BeginScope();
+                using var outerScope = ScopeManager.BeginScope();
                 await Task.Yield();
 
-                var innerScope = _provider.BeginScope();
+                var innerScope = ScopeManager.BeginScope();
                 await Task.Yield();
 
                 // Act
@@ -134,38 +134,38 @@ namespace Ninject.Extensions.AmbientScopes.Tests
 
                 // Assert
                 Assert.True(innerScope.IsDisposed);
-                Assert.Equal(outerScope, _provider.Current);
+                Assert.Equal(outerScope, ScopeManager.Current);
             }
 
 
             [Fact]
-            public async Task WhenPreviousIsDisposedThenNestedScopeResetsToNull()
+            public async Task ThenNestedScopeResetsToNullWhenPreviousIsDisposed()
             {
                 // Begin scopes
-                using var outerScope = _provider.BeginScope();
+                using var outerScope = ScopeManager.BeginScope();
                 await Task.Yield();
 
-                var innerScope = _provider.BeginScope();
+                var innerScope = ScopeManager.BeginScope();
                 await Task.Yield();
 
                 // Disposing outer scope should not reset current scope
                 outerScope.Dispose();
                 await Task.Yield();
                 Assert.True(outerScope.IsDisposed);
-                Assert.Equal(innerScope, _provider.Current);
+                Assert.Equal(innerScope, ScopeManager.Current);
 
                 // Disposing inner scope should reset current scope to null
                 innerScope.Dispose();
                 await Task.Yield();
                 Assert.True(innerScope.IsDisposed);
-                Assert.Null(_provider.Current);
+                Assert.Null(ScopeManager.Current);
             }
 
             [Fact]
             public async Task ScopeIsNotDisposedTwice()
             {
                 // Arrange
-                var scope = _provider.BeginScope();
+                var scope = ScopeManager.BeginScope();
                 var disposeCount = 0;
                 scope.Disposed += (s, e) => disposeCount++;
                 await Task.Yield();
@@ -178,7 +178,7 @@ namespace Ninject.Extensions.AmbientScopes.Tests
                 await Task.Yield();
 
                 // Assert
-                Assert.Null(_provider.Current);
+                Assert.Null(ScopeManager.Current);
                 Assert.True(scope.IsDisposed);
                 Assert.Equal(1, disposeCount);
             }
