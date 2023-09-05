@@ -48,6 +48,38 @@ To install the package, you can reference it directly from your project.
     // myService will be disposed here.
     ```
 
+### Adapter for `IServiceScopeFactory`
+
+In addition to the core implementation, this project also provides an adapter for the `IServiceScopeFactory` interface from Microsoft's Dependency Injection package.
+
+By utilizing this adapter, you can seamlessly integrate the benefits of ambient scopes without directly referencing the specific Ninject implementation. 
+Instead, you can inject the standard `IServiceScopeFactory` into your classes, allowing for a consistent and portable approach to managing object lifecycles across different contexts.
+
+```csharp
+public class MyService
+{
+    private readonly IServiceScopeFactory _serviceScopeFactory;
+
+    public MyService(IServiceScopeFactory serviceScopeFactory)
+    {
+        _serviceScopeFactory = serviceScopeFactory;
+    }
+
+    public void DoWork()
+    {
+        using (var scope = _serviceScopeFactory.CreateScope())
+        {
+            var scopedServiceProvider = scope.ServiceProvider;
+            var myScopedInstance = scopedServiceProvider.GetService<ScopedService>();
+            
+            // Use myScopedInstance...
+        }
+
+        // The scoped resources are disposed when the scope is exited.
+    }
+}
+```
+
 ### Nested Scopes
 
 You can nest ambient scopes, each new scope will be isolated from the others.

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 
@@ -9,7 +10,7 @@ namespace Ninject.Extensions.AmbientScopes
     /// <summary>
     /// Provides management for ambient scopes, allowing objects to be tracked within specific lifecycles.
     /// </summary>
-    public class AmbientScopeProvider
+    public class AmbientScopeManager
     {
 
         private readonly object _lock = new object();
@@ -22,6 +23,7 @@ namespace Ninject.Extensions.AmbientScopes
         public AmbientScope Current
         {
             get => _current.Value;
+            set => SetCurrent(value);
         }
 
         /// <summary>
@@ -29,12 +31,27 @@ namespace Ninject.Extensions.AmbientScopes
         /// </summary>
         public AmbientScope BeginScope()
         {
+            var newScope = new AmbientScope(_current.Value);
+            SetCurrent(newScope);
+            return newScope;
+        }
+
+        /// <summary>
+        /// Sets an existing ambient scope as the current scope.
+        /// </summary>
+        /// <returns>The previous ambient scope</returns>
+        public AmbientScope SetCurrent(AmbientScope existingScope)
+        {
             lock (_lock)
             {
-                var newScope = new AmbientScope(_current.Value);
-                newScope.Disposed += OnAmbientScopeDisposed;
-                _current.Value = newScope;
-                return newScope;
+                var oldScope = _current.Value;
+                _current.Value = existingScope;
+                if (existingScope != null)
+                {
+                    existingScope.Disposed -= OnAmbientScopeDisposed;
+                    existingScope.Disposed += OnAmbientScopeDisposed;
+                }
+                return oldScope;
             }
         }
 
@@ -51,7 +68,7 @@ namespace Ninject.Extensions.AmbientScopes
 
         private static AmbientScope GetValidAncestor(AmbientScope disposedScope)
         {
-            AmbientScope validAncestor = disposedScope.Parent;            
+            AmbientScope validAncestor = disposedScope.Parent;
             while (validAncestor != null && validAncestor.IsDisposed)
             {
                 validAncestor = validAncestor.Parent;
