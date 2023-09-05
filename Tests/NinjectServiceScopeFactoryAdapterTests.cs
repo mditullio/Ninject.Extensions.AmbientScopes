@@ -16,7 +16,7 @@ namespace Ninject.Extensions.AmbientScopes.Tests
         public async Task ServiceScopeAdaptersResolveInstancesInIsolation()
         {
             var kernel = new StandardKernel();
-            kernel.UseAmbientScopes();
+            kernel.LoadAmbientScopeModule();
             kernel.Bind<MyServiceA>().ToSelf().InAmbientScope();
             kernel.Bind<MyServiceB>().ToSelf().InAmbientScope();
             kernel.Bind<MyServiceC>().ToSelf().InAmbientScope();
@@ -74,7 +74,7 @@ namespace Ninject.Extensions.AmbientScopes.Tests
         public async Task AmbientScopeIsNotCorruptedWhenGetServiceThrowsException()
         {
             var kernel = new StandardKernel();
-            kernel.UseAmbientScopes();
+            kernel.LoadAmbientScopeModule();
             kernel.Bind<MyBrokenService>().ToSelf().InAmbientScope();
 
             // Assume there's an existing ambient scope

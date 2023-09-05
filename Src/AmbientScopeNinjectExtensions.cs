@@ -48,15 +48,16 @@ namespace Ninject.Extensions.AmbientScopes
         /// <summary>
         /// Sets up the ambient scope infrastructure within the Ninject kernel.
         /// </summary>
-        public static void UseAmbientScopes(this IKernel kernel)
+        public static void LoadAmbientScopeModule(this IKernel kernel)
         {
             if (kernel is null)
             {
                 throw new ArgumentNullException(nameof(kernel));
             }
-
-            kernel.Bind<AmbientScopeManager>().ToSelf().InSingletonScope();
-            kernel.Bind<IServiceScopeFactory>().To<NinjectServiceScopeFactoryAdapter>().InSingletonScope();
+            if (!kernel.HasModule(AmbientScopeNinjectModule.MODULE_NAME))
+            {
+                kernel.Load<AmbientScopeNinjectModule>();
+            }
         }
 
         /// <summary>
