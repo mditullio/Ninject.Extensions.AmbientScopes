@@ -30,6 +30,9 @@ namespace Ninject.Extensions.AmbientScopes
             get => _parent;
         }
 
+        /// <summary>
+        /// Creates an ambient scope, optionally with a parent scope.
+        /// </summary>
         public AmbientScope(AmbientScope parent = null)
         {
             _parent = parent;

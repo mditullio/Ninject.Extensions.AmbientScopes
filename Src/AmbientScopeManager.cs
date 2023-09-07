@@ -55,6 +55,48 @@ namespace Ninject.Extensions.AmbientScopes
             }
         }
 
+        /// <summary>
+        /// Executes a provided function within a specified ambient scope, ensuring proper scope management.
+        /// <para>
+        /// This method sets the specified <paramref name="ambientScope"/> as the current ambient scope,
+        /// allowing the provided function to execute within that scope. After the function execution,
+        /// the method ensures that the previous ambient scope (if any) is correctly restored.
+        /// </para>
+        /// </summary>
+        public T ExecuteInScope<T>(AmbientScope ambientScope, Func<T> func)
+        {
+            var previousScope = SetCurrent(ambientScope);
+            try
+            {
+                return func();
+            }
+            finally
+            {
+                SetCurrent(previousScope);
+            }
+        }
+
+        /// <summary>
+        /// Executes a provided action within a specified ambient scope, ensuring proper scope management.
+        /// <para>
+        /// This method sets the specified <paramref name="ambientScope"/> as the current ambient scope,
+        /// allowing the provided action to execute within that scope. After the function execution,
+        /// the method ensures that the previous ambient scope (if any) is correctly restored.
+        /// </para>
+        /// </summary>
+        public void ExecuteInScope(AmbientScope ambientScope, Action action)
+        {
+            var previousScope = SetCurrent(ambientScope);
+            try
+            {
+                action();
+            }
+            finally
+            {
+                SetCurrent(previousScope);
+            }
+        }
+
         private void OnAmbientScopeDisposed(object sender, EventArgs args)
         {
             lock (_lock)

@@ -1,37 +1,26 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Ninject.Extensions.AmbientScopes
 {
     public class NinjectServiceProviderAdapter : IServiceProvider
     {
 
-        public IKernel Kernel { get; }
+        private readonly IKernel _kernel;
 
-        public AmbientScopeManager AmbientScopeManager { get; }
+        private readonly AmbientScopeManager _ambientScopeManager;
 
-        public AmbientScope AmbientScope { get; }
+        private readonly AmbientScope _ambientScope;
 
-        public NinjectServiceProviderAdapter(IKernel kernel, AmbientScopeManager scopeFactory, AmbientScope ambientScope)
+        public NinjectServiceProviderAdapter(IKernel kernel)
         {
-            Kernel = kernel ?? throw new ArgumentNullException(nameof(kernel));
-            AmbientScopeManager = scopeFactory ?? throw new ArgumentNullException(nameof(scopeFactory));
-            AmbientScope = ambientScope ?? throw new ArgumentNullException(nameof(ambientScope));
+            _kernel = kernel ?? throw new ArgumentNullException(nameof(kernel));
+            _ambientScopeManager = _kernel.Get<AmbientScopeManager>();
+            _ambientScope = _ambientScopeManager.Current;
         }
 
         public object GetService(Type serviceType)
         {
-            var previousScope = AmbientScopeManager.SetCurrent(AmbientScope);
-            try
-            {
-                var service = Kernel.GetService(serviceType);
-                return service;
-            }
-            finally
-            {
-                AmbientScopeManager.SetCurrent(previousScope);
-            }
+            return _ambientScopeManager.ExecuteInScope(_ambientScope, () => _kernel.GetService(serviceType));
         }
 
     }

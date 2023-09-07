@@ -1,8 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Ninject.Activation;
 using Ninject.Modules;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Ninject.Extensions.AmbientScopes
 {
@@ -15,8 +14,44 @@ namespace Ninject.Extensions.AmbientScopes
 
         public override void Load()
         {
+            // Ambient scope manager
             Kernel.Bind<AmbientScopeManager>().ToSelf().InSingletonScope();
-            Kernel.Bind<IServiceScopeFactory>().To<NinjectServiceScopeFactoryAdapter>().InSingletonScope();
+
+            // Service scope factory
+            Kernel.Bind<IServiceScopeFactory>().ToMethod(ResolveServiceScopeFactory).InSingletonScope();
+            Kernel.Bind<NinjectServiceScopeFactoryAdapter>().ToSelf().InSingletonScope();
+
+            // Service scope
+            Kernel.Bind<IServiceScope>().ToMethod(ResolveServiceScope).InTransientScope();
+            Kernel.Bind<NinjectServiceScopeAdapter>().ToSelf().InTransientScope();
+
+            // Service provider
+            Kernel.Bind<IServiceProvider>().ToMethod(ResolveServiceProvider).InAmbientOrSingletonScope();
+            Kernel.Bind<NinjectServiceProviderAdapter>().ToSelf().InAmbientOrSingletonScope();
         }
+
+        private static IServiceProvider ResolveServiceProvider(IContext context)
+        {
+            var ambientScope = context.Kernel.GetAmbientScope();
+            if (ambientScope != null)
+            {
+                return context.Kernel.Get<NinjectServiceProviderAdapter>();
+            }
+            else
+            {
+                return context.Kernel;
+            }
+        }
+
+        private static IServiceScope ResolveServiceScope(IContext context)
+        {
+            return context.Kernel.Get<NinjectServiceScopeAdapter>();
+        }
+
+        private static IServiceScopeFactory ResolveServiceScopeFactory(IContext context)
+        {
+            return context.Kernel.Get<NinjectServiceScopeFactoryAdapter>();
+        }
+
     }
 }
