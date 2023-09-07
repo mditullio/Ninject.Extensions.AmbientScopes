@@ -1,23 +1,20 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Ninject.Syntax;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Ninject.Extensions.AmbientScopes
 {
     public class NinjectServiceScopeFactoryAdapter : IServiceScopeFactory
     {
-        public IKernel Kernel { get; }
+        private readonly IKernel _kernel;
 
         public NinjectServiceScopeFactoryAdapter(IKernel kernel)
         {
-            Kernel = kernel ?? throw new ArgumentNullException(nameof(kernel));
+            _kernel = kernel ?? throw new ArgumentNullException(nameof(kernel));
         }
 
         public IServiceScope CreateScope()
         {
-            return new NinjectServiceScopeAdapter(Kernel);
+            return _kernel.Get<NinjectServiceScopeAdapter>();
         }
     }
 }

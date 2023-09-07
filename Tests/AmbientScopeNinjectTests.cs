@@ -70,14 +70,17 @@ namespace Ninject.Extensions.AmbientScopes.Tests
 
             MyServiceA firstInstance;
             MyServiceA secondInstance;
+            MyServiceA thirdInstance;
 
             using (kernel.BeginAmbientScope())
             {
                 firstInstance = kernel.Get<MyServiceA>();
                 secondInstance = kernel.Get<MyServiceA>();
+                thirdInstance = firstInstance.Kernel.Get<MyServiceA>();
             }
 
             Assert.Same(firstInstance, secondInstance);
+            Assert.Same(firstInstance, thirdInstance);
             Assert.Same(firstInstance.MyServiceB, secondInstance.MyServiceB);
             Assert.Same(firstInstance.MyServiceC, firstInstance.MyServiceB.MyServiceC);
             Assert.True(firstInstance.IsDisposed);

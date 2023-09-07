@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Ninject.Activation;
 using Ninject.Extensions;
+using Ninject.Infrastructure;
 using Ninject.Syntax;
 using Ninject.Web.Common;
 using System;
@@ -46,6 +47,22 @@ namespace Ninject.Extensions.AmbientScopes
         }
 
         /// <summary>
+        /// Binds a type to an ambient scope. 
+        /// Instances of the bound type will be created and managed within the current ambient scope.
+        /// <para>
+        /// If no ambient scope is defined, instances activated via this binding are in singleton scope.
+        /// </para>
+        /// </summary>
+        public static IBindingNamedWithOrOnSyntax<T> InAmbientOrSingletonScope<T>(this IBindingInSyntax<T> bindingInSyntax)
+        {
+            if (bindingInSyntax is null)
+            {
+                throw new ArgumentNullException(nameof(bindingInSyntax));
+            }
+            return bindingInSyntax.InScope(GetAmbientOrSingletonScope);
+        }
+
+        /// <summary>
         /// Sets up the ambient scope infrastructure within the Ninject kernel.
         /// </summary>
         public static void LoadAmbientScopeModule(this IKernel kernel)
@@ -73,9 +90,27 @@ namespace Ninject.Extensions.AmbientScopes
             return kernel.Get<AmbientScopeManager>().BeginScope();
         }
 
+        /// <summary>
+        /// Gets the current ambient scope.
+        /// </summary>
+        public static AmbientScope GetAmbientScope(this IKernel kernel)
+        {
+            if (kernel is null)
+            {
+                throw new ArgumentNullException(nameof(kernel));
+            }
+
+            return kernel.Get<AmbientScopeManager>().Current;
+        }
+
         private static object GetAmbientOrRequestScope(IContext ctx)
         {
             return GetAmbientScope(ctx) ?? GetRequestScope(ctx);
+        }
+
+        private static object GetAmbientOrSingletonScope(IContext ctx)
+        {
+            return GetAmbientScope(ctx) ?? StandardScopeCallbacks.Singleton(ctx);
         }
 
         private static object GetAmbientScope(IContext ctx)

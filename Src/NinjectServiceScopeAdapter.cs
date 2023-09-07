@@ -1,32 +1,30 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Text;
 
 namespace Ninject.Extensions.AmbientScopes
 {
     public class NinjectServiceScopeAdapter : IServiceScope
     {
+
+        private readonly IKernel _kernel;
+
+        private readonly AmbientScopeManager _ambientScopeManager;
+
+        private readonly AmbientScope _ambientScope;
+
         public IServiceProvider ServiceProvider { get; }
-
-        public IKernel Kernel { get; }
-
-        public AmbientScopeManager AmbientScopeManager { get; }
-
-        public AmbientScope AmbientScope { get; }
 
         public NinjectServiceScopeAdapter(IKernel kernel)
         {
-            Kernel = kernel ?? throw new ArgumentNullException(nameof(kernel));
-            AmbientScopeManager = kernel.Get<AmbientScopeManager>();
-            AmbientScope = new AmbientScope();
-            ServiceProvider = new NinjectServiceProviderAdapter(Kernel, AmbientScopeManager, AmbientScope);
+            _kernel = kernel ?? throw new ArgumentNullException(nameof(kernel));
+            _ambientScopeManager = _kernel.Get<AmbientScopeManager>();
+            _ambientScope = new AmbientScope();
+            ServiceProvider = _ambientScopeManager.ExecuteInScope(_ambientScope, () => _kernel.Get<NinjectServiceProviderAdapter>());
         }
 
         public void Dispose()
         {
-            AmbientScope.Dispose();
+            _ambientScope.Dispose();
         }
 
     }
